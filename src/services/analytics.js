@@ -6,6 +6,11 @@ class AnalyticsService {
   }
 
   generateSessionId() {
+    // Use crypto for better randomness
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return `session_${Date.now()}_${crypto.randomUUID()}`;
+    }
+    // Fallback for older browsers
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 

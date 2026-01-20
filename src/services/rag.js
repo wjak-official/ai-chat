@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { supabaseConfig, ragConfig } from '../config/supabase';
-import ollamaService from './ollama';
+import { ollamaConfig } from '../config/ollama';
 
 class RAGService {
   constructor() {
@@ -18,7 +18,7 @@ class RAGService {
 
   async generateEmbedding(text) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_OLLAMA_API_URL || 'http://localhost:11434'}/api/embeddings`, {
+      const response = await fetch(`${ollamaConfig.apiEndpoint}/api/embeddings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
