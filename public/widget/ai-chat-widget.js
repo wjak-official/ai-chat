@@ -255,6 +255,11 @@
       closeBtn.addEventListener('click', closeHandler);
       minimizeBtn.addEventListener('click', minimizeHandler);
 
+      // Track shadow DOM listeners for cleanup (optional but thorough)
+      this.eventListeners.push({ target: toggleBtn, type: 'click', handler: toggleHandler });
+      this.eventListeners.push({ target: closeBtn, type: 'click', handler: closeHandler });
+      this.eventListeners.push({ target: minimizeBtn, type: 'click', handler: minimizeHandler });
+
       // Listen for messages from iframe
       const messageHandler = (event) => {
         if (event.data.type === 'chat-event') {

@@ -105,7 +105,7 @@ class RAGService {
   chunkText(text, chunkSize = ragConfig.chunkSize, overlap = ragConfig.chunkOverlap) {
     // Validate to prevent infinite loop
     if (overlap >= chunkSize) {
-      console.warn(`chunkOverlap (${overlap}) must be less than chunkSize (${chunkSize}). Using overlap = chunkSize - 1.`);
+      console.warn(`chunkOverlap (${overlap}) must be less than chunkSize (${chunkSize}). Using overlap = max(0, chunkSize - 1).`);
       overlap = Math.max(0, chunkSize - 1);
     }
     
