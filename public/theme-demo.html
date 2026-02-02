@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Theme Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      padding: 40px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    
+    .theme-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 30px 0;
+    }
+    
+    .theme-button {
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .theme-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .theme-button.active {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    .theme-preview {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      margin: 0 auto 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 AI Chat Widget - Theme Demo</h1>
+    <p class="subtitle">Select a theme to see the widget color change</p>
+
+    <div class="theme-selector">
+      <div class="theme-button active" onclick="changeTheme('purple')">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+        <strong>Purple</strong>
+        <div style="font-size: 12px; color: #666;">Default</div>
+      </div>
+      
+      <div class="theme-button" onclick="changeTheme('blue')">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);"></div>
+        <strong>Blue</strong>
+        <div style="font-size: 12px; color: #666;">Ocean</div>
+      </div>
+      
+      <div class="theme-button" onclick="changeTheme('green')">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);"></div>
+        <strong>Green</strong>
+        <div style="font-size: 12px; color: #666;">Nature</div>
+      </div>
+      
+      <div class="theme-button" onclick="changeTheme('red')">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);"></div>
+        <strong>Red</strong>
+        <div style="font-size: 12px; color: #666;">Energy</div>
+      </div>
+      
+      <div class="theme-button" onclick="changeTheme('orange')">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);"></div>
+        <strong>Orange</strong>
+        <div style="font-size: 12px; color: #666;">Warm</div>
+      </div>
+      
+      <div class="theme-button" onclick="changeTheme('pink')">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #ed64a6 0%, #d53f8c 100%);"></div>
+        <strong>Pink</strong>
+        <div style="font-size: 12px; color: #666;">Vibrant</div>
+      </div>
+    </div>
+
+    <h2>Features</h2>
+    <ul>
+      <li>✅ 6 beautiful theme options</li>
+      <li>✅ Dynamic color gradients</li>
+      <li>✅ Smooth transitions</li>
+      <li>✅ Easy integration</li>
+    </ul>
+
+    <h2>Code Example</h2>
+    <pre style="background: #f5f5f5; padding: 15px; border-radius: 6px; overflow-x: auto;"><code>&lt;ai-chat-widget 
+  api-url="https://your-domain.vercel.app"
+  personality="customer-support"
+  <strong>theme="<span id="current-theme">purple</span>"</strong>
+  position="bottom-right"
+&gt;&lt;/ai-chat-widget&gt;</code></pre>
+
+    <p style="margin-top: 30px; color: #666;">
+      Click the chat button in the bottom-right corner to see the themed widget!
+    </p>
+  </div>
+
+  <!-- AI Chat Widget -->
+  <script src="/widget/ai-chat-widget.js"></script>
+  <ai-chat-widget 
+    id="chat-widget"
+    api-url="http://localhost:5173"
+    personality="friendly-assistant"
+    theme="purple"
+    position="bottom-right"
+    tracking="false"
+  ></ai-chat-widget>
+
+  <script>
+    function changeTheme(theme) {
+      // Update active button
+      document.querySelectorAll('.theme-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+
+      // Update theme display
+      document.getElementById('current-theme').textContent = theme;
+
+      // Remove and recreate widget with new theme
+      const oldWidget = document.getElementById('chat-widget');
+      const parent = oldWidget.parentNode;
+      parent.removeChild(oldWidget);
+
+      const newWidget = document.createElement('ai-chat-widget');
+      newWidget.id = 'chat-widget';
+      newWidget.setAttribute('api-url', 'http://localhost:5173');
+      newWidget.setAttribute('personality', 'friendly-assistant');
+      newWidget.setAttribute('theme', theme);
+      newWidget.setAttribute('position', 'bottom-right');
+      newWidget.setAttribute('tracking', 'false');
+      parent.appendChild(newWidget);
+    }
+  </script>
+</body>
+</html>
