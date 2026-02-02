@@ -70,37 +70,37 @@
     <p class="subtitle">Select a theme to see the widget color change</p>
 
     <div class="theme-selector">
-      <div class="theme-button active" onclick="changeTheme('purple')">
+      <div class="theme-button active" onclick="changeTheme('purple', event)">
         <div class="theme-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
         <strong>Purple</strong>
         <div style="font-size: 12px; color: #666;">Default</div>
       </div>
       
-      <div class="theme-button" onclick="changeTheme('blue')">
+      <div class="theme-button" onclick="changeTheme('blue', event)">
         <div class="theme-preview" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);"></div>
         <strong>Blue</strong>
         <div style="font-size: 12px; color: #666;">Ocean</div>
       </div>
       
-      <div class="theme-button" onclick="changeTheme('green')">
+      <div class="theme-button" onclick="changeTheme('green', event)">
         <div class="theme-preview" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);"></div>
         <strong>Green</strong>
         <div style="font-size: 12px; color: #666;">Nature</div>
       </div>
       
-      <div class="theme-button" onclick="changeTheme('red')">
+      <div class="theme-button" onclick="changeTheme('red', event)">
         <div class="theme-preview" style="background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);"></div>
         <strong>Red</strong>
         <div style="font-size: 12px; color: #666;">Energy</div>
       </div>
       
-      <div class="theme-button" onclick="changeTheme('orange')">
+      <div class="theme-button" onclick="changeTheme('orange', event)">
         <div class="theme-preview" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);"></div>
         <strong>Orange</strong>
         <div style="font-size: 12px; color: #666;">Warm</div>
       </div>
       
-      <div class="theme-button" onclick="changeTheme('pink')">
+      <div class="theme-button" onclick="changeTheme('pink', event)">
         <div class="theme-preview" style="background: linear-gradient(135deg, #ed64a6 0%, #d53f8c 100%);"></div>
         <strong>Pink</strong>
         <div style="font-size: 12px; color: #666;">Vibrant</div>
@@ -140,7 +140,7 @@
   ></ai-chat-widget>
 
   <script>
-    function changeTheme(theme) {
+    function changeTheme(theme, event) {
       // Update active button
       document.querySelectorAll('.theme-button').forEach(btn => {
         btn.classList.remove('active');
