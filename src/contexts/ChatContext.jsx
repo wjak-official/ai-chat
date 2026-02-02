@@ -3,7 +3,7 @@ import ollamaService from '../services/ollama';
 import analyticsService from '../services/analytics';
 import ragService from '../services/rag';
 import { defaultPersonality, getPersonalityById } from '../config/personalities';
-import { ollamaConfig } from '../config/ollama';
+import { ollamaConfig, getModelById } from '../config/ollama';
 
 const ChatContext = createContext();
 
@@ -48,8 +48,14 @@ export const ChatProvider = ({ children, initialPersonality }) => {
   }, [personality]);
 
   const changeModel = useCallback((modelId) => {
-    analyticsService.trackModelChange(model, modelId);
-    setModel(modelId);
+    // Validate model exists using getModelById
+    const modelInfo = getModelById(modelId);
+    if (modelInfo) {
+      analyticsService.trackModelChange(model, modelId);
+      setModel(modelId);
+    } else {
+      console.warn(`Model ${modelId} not found. Keeping current model: ${model}`);
+    }
   }, [model]);
 
   const sendMessage = useCallback(async (content) => {
