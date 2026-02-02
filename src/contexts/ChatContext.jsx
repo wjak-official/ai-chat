@@ -3,7 +3,7 @@ import ollamaService from '../services/ollama';
 import analyticsService from '../services/analytics';
 import ragService from '../services/rag';
 import { defaultPersonality, getPersonalityById } from '../config/personalities';
-import { ollamaConfig, getModelById } from '../config/ollama';
+import { ollamaConfig } from '../config/ollama';
 
 const ChatContext = createContext();
 
@@ -15,9 +15,15 @@ export const useChat = () => {
   return context;
 };
 
-export const ChatProvider = ({ children }) => {
+export const ChatProvider = ({ children, initialPersonality }) => {
   const [messages, setMessages] = useState([]);
-  const [personality, setPersonality] = useState(defaultPersonality);
+  const [personality, setPersonality] = useState(() => {
+    if (initialPersonality) {
+      const p = getPersonalityById(initialPersonality);
+      return p || defaultPersonality;
+    }
+    return defaultPersonality;
+  });
   const [model, setModel] = useState(ollamaConfig.defaultModel);
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -65,9 +71,15 @@ export const ChatProvider = ({ children }) => {
     try {
       const startTime = Date.now();
       
+      // Build system prompt with RAG context if enabled
+      let systemPrompt = personality.systemPrompt;
+      if (useRAG && ragService.isEnabled()) {
+        systemPrompt = await ragService.buildContextualPrompt(content.trim(), personality.systemPrompt);
+      }
+      
       // Prepare messages for Ollama
       const chatMessages = [
-        { role: 'system', content: personality.systemPrompt },
+        { role: 'system', content: systemPrompt },
         ...messages.map(msg => ({
           role: msg.role,
           content: msg.content
@@ -116,9 +128,15 @@ export const ChatProvider = ({ children }) => {
     try {
       const startTime = Date.now();
       
+      // Build system prompt with RAG context if enabled
+      let systemPrompt = personality.systemPrompt;
+      if (useRAG && ragService.isEnabled()) {
+        systemPrompt = await ragService.buildContextualPrompt(content.trim(), personality.systemPrompt);
+      }
+      
       // Prepare messages for Ollama
       const chatMessages = [
-        { role: 'system', content: personality.systemPrompt },
+        { role: 'system', content: systemPrompt },
         ...messages.map(msg => ({
           role: msg.role,
           content: msg.content

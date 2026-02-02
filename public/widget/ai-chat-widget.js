@@ -13,6 +13,7 @@
       this.isMinimized = false;
       this.analytics = [];
       this.sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      this.eventListeners = []; // Track event listeners for cleanup
     }
 
     connectedCallback() {
@@ -23,20 +24,41 @@
       this.loadIframe(config);
     }
 
+    disconnectedCallback() {
+      // Clean up all event listeners
+      this.eventListeners.forEach(({ target, type, handler }) => {
+        target.removeEventListener(type, handler);
+      });
+      this.eventListeners = [];
+    }
+
     getConfig() {
       return {
         apiUrl: this.getAttribute('api-url') || 'http://localhost:5173',
         personality: this.getAttribute('personality') || 'customer-support',
         position: this.getAttribute('position') || 'bottom-right',
-        theme: this.getAttribute('theme') || 'blue',
+        theme: this.getAttribute('theme') || 'purple',
         autoOpen: this.getAttribute('auto-open') === 'true',
         tracking: this.getAttribute('tracking') !== 'false',
       };
     }
 
+    getThemeColors(theme) {
+      const themes = {
+        purple: { primary: '#667eea', secondary: '#764ba2' },
+        blue: { primary: '#4299e1', secondary: '#3182ce' },
+        green: { primary: '#48bb78', secondary: '#38a169' },
+        red: { primary: '#f56565', secondary: '#e53e3e' },
+        orange: { primary: '#ed8936', secondary: '#dd6b20' },
+        pink: { primary: '#ed64a6', secondary: '#d53f8c' },
+      };
+      return themes[theme] || themes.purple;
+    }
+
     render() {
       const config = this.getConfig();
       const position = this.getPositionStyles(config.position);
+      const colors = this.getThemeColors(config.theme);
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -51,7 +73,7 @@
             width: 60px;
             height: 60px;
             border-radius: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -99,7 +121,7 @@
           }
 
           .widget-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);
             color: white;
             padding: 15px;
             display: flex;
@@ -224,18 +246,23 @@
       const toggleBtn = this.shadowRoot.getElementById('widget-toggle');
       const closeBtn = this.shadowRoot.getElementById('close-btn');
       const minimizeBtn = this.shadowRoot.getElementById('minimize-btn');
-      const container = this.shadowRoot.getElementById('widget-container');
 
-      toggleBtn.addEventListener('click', () => this.toggleWidget());
-      closeBtn.addEventListener('click', () => this.closeWidget());
-      minimizeBtn.addEventListener('click', () => this.minimizeWidget());
+      const toggleHandler = () => this.toggleWidget();
+      const closeHandler = () => this.closeWidget();
+      const minimizeHandler = () => this.minimizeWidget();
+
+      toggleBtn.addEventListener('click', toggleHandler);
+      closeBtn.addEventListener('click', closeHandler);
+      minimizeBtn.addEventListener('click', minimizeHandler);
 
       // Listen for messages from iframe
-      window.addEventListener('message', (event) => {
+      const messageHandler = (event) => {
         if (event.data.type === 'chat-event') {
           this.trackEvent(event.data.event, event.data.data);
         }
-      });
+      };
+      window.addEventListener('message', messageHandler);
+      this.eventListeners.push({ target: window, type: 'message', handler: messageHandler });
 
       // Track user interactions on host page
       if (this.getConfig().tracking) {
@@ -321,18 +348,20 @@
 
     trackUserBehavior() {
       // Track clicks
-      document.addEventListener('click', (e) => {
+      const clickHandler = (e) => {
         this.trackEvent('click', {
           element: e.target.tagName,
           text: e.target.innerText?.substring(0, 50),
           x: e.clientX,
           y: e.clientY,
         });
-      });
+      };
+      document.addEventListener('click', clickHandler);
+      this.eventListeners.push({ target: document, type: 'click', handler: clickHandler });
 
       // Track scrolling
       let scrollTimeout;
-      window.addEventListener('scroll', () => {
+      const scrollHandler = () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
           this.trackEvent('scroll', {
@@ -341,23 +370,29 @@
             scrollPercent: Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100),
           });
         }, 500);
-      });
+      };
+      window.addEventListener('scroll', scrollHandler);
+      this.eventListeners.push({ target: window, type: 'scroll', handler: scrollHandler });
 
       // Track time on page
       let pageLoadTime = Date.now();
-      window.addEventListener('beforeunload', () => {
+      const beforeUnloadHandler = () => {
         this.trackEvent('page_exit', {
           timeOnPage: Date.now() - pageLoadTime,
         });
-      });
+      };
+      window.addEventListener('beforeunload', beforeUnloadHandler);
+      this.eventListeners.push({ target: window, type: 'beforeunload', handler: beforeUnloadHandler });
 
       // Track form interactions
-      document.addEventListener('submit', (e) => {
+      const submitHandler = (e) => {
         this.trackEvent('form_submit', {
           formId: e.target.id,
           formAction: e.target.action,
         });
-      });
+      };
+      document.addEventListener('submit', submitHandler);
+      this.eventListeners.push({ target: document, type: 'submit', handler: submitHandler });
     }
 
     sendAnalytics(event) {

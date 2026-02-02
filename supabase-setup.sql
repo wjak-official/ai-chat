@@ -67,16 +67,16 @@ create trigger update_website_documents_updated_at
 alter table website_documents enable row level security;
 
 -- Create policies for RLS (adjust based on your needs)
--- Allow authenticated users to read documents
-create policy "Allow authenticated users to read documents"
+-- Allow public (anon) users to read documents
+create policy "Allow public users to read documents"
   on website_documents for select
-  to authenticated
+  to anon, authenticated
   using (true);
 
--- Allow authenticated users to insert documents
-create policy "Allow authenticated users to insert documents"
+-- Allow public (anon) users to insert documents
+create policy "Allow public users to insert documents"
   on website_documents for insert
-  to authenticated
+  to anon, authenticated
   with check (true);
 
 -- Allow authenticated users to update documents
