@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import ollamaService from '../services/ollama';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import aiService from '../services/ai';
 import analyticsService from '../services/analytics';
 import ragService from '../services/rag';
 import { defaultPersonality, getPersonalityById } from '../config/personalities';
 import { ollamaConfig, getModelById } from '../config/ollama';
+import { geminiConfig, getGeminiModelById } from '../config/gemini';
 
 const ChatContext = createContext();
 
@@ -24,21 +25,73 @@ export const ChatProvider = ({ children, initialPersonality }) => {
     }
     return defaultPersonality;
   });
+  const [provider, setProvider] = useState('ollama'); // 'ollama' or 'gemini'
   const [model, setModel] = useState(ollamaConfig.defaultModel);
+  const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
   const [useRAG, setUseRAG] = useState(ragService.isEnabled());
 
+  // Initialize AI service provider
+  useEffect(() => {
+    aiService.setProvider(provider);
+    
+    // Auto-detect provider on mount
+    const detectProvider = async () => {
+      const storedApiKey = localStorage.getItem('gemini_api_key');
+      if (storedApiKey) {
+        setGeminiApiKey(storedApiKey);
+        aiService.setGeminiApiKey(storedApiKey);
+        
+        // Check if Gemini is working
+        const geminiWorking = await aiService.checkHealth();
+        if (geminiWorking) {
+          setProvider('gemini');
+          setModel(geminiConfig.defaultModel);
+        }
+      }
+    };
+    
+    detectProvider();
+  }, []);
+
+  // Update AI service when provider or API key changes
+  useEffect(() => {
+    aiService.setProvider(provider);
+    if (provider === 'gemini' && geminiApiKey) {
+      aiService.setGeminiApiKey(geminiApiKey);
+      localStorage.setItem('gemini_api_key', geminiApiKey);
+    }
+  }, [provider, geminiApiKey]);
+
   const checkConnection = useCallback(async () => {
     try {
-      const connected = await ollamaService.checkHealth();
+      const connected = await aiService.checkHealth();
       setIsConnected(connected);
       return connected;
     } catch (err) {
       setIsConnected(false);
       return false;
     }
+  }, []);
+
+  const changeProvider = useCallback((newProvider) => {
+    setProvider(newProvider);
+    
+    // Switch to default model for new provider
+    if (newProvider === 'gemini') {
+      setModel(geminiConfig.defaultModel);
+    } else {
+      setModel(ollamaConfig.defaultModel);
+    }
+    
+    analyticsService.trackUserInteraction('provider_change', { provider: newProvider });
+  }, []);
+
+  const updateGeminiApiKey = useCallback((apiKey) => {
+    setGeminiApiKey(apiKey);
+    aiService.setGeminiApiKey(apiKey);
   }, []);
 
   const changePersonality = useCallback((personalityId) => {
@@ -48,15 +101,21 @@ export const ChatProvider = ({ children, initialPersonality }) => {
   }, [personality]);
 
   const changeModel = useCallback((modelId) => {
-    // Validate model exists using getModelById
-    const modelInfo = getModelById(modelId);
+    // Validate model exists
+    let modelInfo;
+    if (provider === 'gemini') {
+      modelInfo = getGeminiModelById(modelId);
+    } else {
+      modelInfo = getModelById(modelId);
+    }
+    
     if (modelInfo) {
       analyticsService.trackModelChange(model, modelId);
       setModel(modelId);
     } else {
       console.warn(`Model ${modelId} not found. Keeping current model: ${model}`);
     }
-  }, [model]);
+  }, [model, provider]);
 
   const sendMessage = useCallback(async (content) => {
     if (!content.trim()) return;
@@ -93,7 +152,7 @@ export const ChatProvider = ({ children, initialPersonality }) => {
         { role: 'user', content: content.trim() }
       ];
 
-      const response = await ollamaService.chat(chatMessages, model);
+      const response = await aiService.chat(chatMessages, model);
       const responseTime = Date.now() - startTime;
 
       const assistantMessage = {
@@ -164,7 +223,7 @@ export const ChatProvider = ({ children, initialPersonality }) => {
       }]);
 
       // Stream the response
-      for await (const chunk of ollamaService.chatStream(chatMessages, model)) {
+      for await (const chunk of aiService.chatStream(chatMessages, model)) {
         fullResponse += chunk;
         setMessages(prev => prev.map(msg => 
           msg.id === assistantMessageId 
@@ -205,6 +264,8 @@ export const ChatProvider = ({ children, initialPersonality }) => {
     messages,
     personality,
     model,
+    provider,
+    geminiApiKey,
     isLoading,
     isConnected,
     error,
@@ -214,6 +275,8 @@ export const ChatProvider = ({ children, initialPersonality }) => {
     deleteMessage,
     changePersonality,
     changeModel,
+    changeProvider,
+    updateGeminiApiKey,
     checkConnection,
     useRAG,
     setUseRAG,
