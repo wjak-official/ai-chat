@@ -33,11 +33,8 @@ export const ChatProvider = ({ children, initialPersonality }) => {
   const [error, setError] = useState(null);
   const [useRAG, setUseRAG] = useState(ragService.isEnabled());
 
-  // Initialize AI service provider
+  // Initialize AI service provider and auto-detect on mount
   useEffect(() => {
-    aiService.setProvider(provider);
-    
-    // Auto-detect provider on mount
     const detectProvider = async () => {
       const storedApiKey = localStorage.getItem('gemini_api_key');
       if (storedApiKey) {
@@ -45,10 +42,14 @@ export const ChatProvider = ({ children, initialPersonality }) => {
         aiService.setGeminiApiKey(storedApiKey);
         
         // Check if Gemini is working
+        aiService.setProvider('gemini');
         const geminiWorking = await aiService.checkHealth();
         if (geminiWorking) {
           setProvider('gemini');
           setModel(geminiConfig.defaultModel);
+        } else {
+          // Fall back to Ollama
+          aiService.setProvider('ollama');
         }
       }
     };

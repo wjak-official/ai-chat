@@ -51,6 +51,12 @@ class GeminiService {
 
     try {
       const { history, systemInstruction } = this.convertMessages(messages);
+      
+      // Ensure we have at least one user message
+      if (history.length === 0) {
+        throw new Error('No user messages found in conversation');
+      }
+      
       const lastMessage = history.pop(); // Remove last user message to send separately
 
       const generativeModel = this.genAI.getGenerativeModel({ 
@@ -88,6 +94,12 @@ class GeminiService {
 
     try {
       const { history, systemInstruction } = this.convertMessages(messages);
+      
+      // Ensure we have at least one user message
+      if (history.length === 0) {
+        throw new Error('No user messages found in conversation');
+      }
+      
       const lastMessage = history.pop(); // Remove last user message to send separately
 
       const generativeModel = this.genAI.getGenerativeModel({ 
