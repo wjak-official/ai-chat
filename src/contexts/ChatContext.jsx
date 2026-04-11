@@ -36,7 +36,7 @@ export const ChatProvider = ({ children, initialPersonality }) => {
   // Initialize AI service provider and auto-detect on mount
   useEffect(() => {
     const detectProvider = async () => {
-      const storedApiKey = localStorage.getItem('gemini_api_key');
+      const storedApiKey = localStorage.getItem('gemini_api_key') || geminiConfig.apiKey;
       if (storedApiKey) {
         setGeminiApiKey(storedApiKey);
         aiService.setGeminiApiKey(storedApiKey);

@@ -20,7 +20,9 @@
       const config = this.getConfig();
       this.render();
       this.attachEventListeners();
-      this.trackPageView();
+      if (config.tracking) {
+        this.trackPageView();
+      }
       this.loadIframe(config);
     }
 
@@ -262,7 +264,18 @@
 
       // Listen for messages from iframe
       const messageHandler = (event) => {
-        if (event.data.type === 'chat-event') {
+        const iframe = this.shadowRoot.getElementById('chat-iframe');
+        let expectedOrigin;
+
+        try {
+          expectedOrigin = new URL(this.getConfig().apiUrl).origin;
+        } catch (error) {
+          return;
+        }
+        if (event.source !== iframe.contentWindow || event.origin !== expectedOrigin) {
+          return;
+        }
+        if (event.data && event.data.type === 'chat-event') {
           this.trackEvent(event.data.event, event.data.data);
         }
       };
@@ -298,7 +311,9 @@
       this.isOpen = true;
       this.isMinimized = false;
       
-      this.trackEvent('widget_opened');
+      if (this.getConfig().tracking) {
+        this.trackEvent('widget_opened');
+      }
     }
 
     closeWidget() {
@@ -311,7 +326,9 @@
       this.isOpen = false;
       this.isMinimized = false;
       
-      this.trackEvent('widget_closed');
+      if (this.getConfig().tracking) {
+        this.trackEvent('widget_closed');
+      }
     }
 
     minimizeWidget() {
@@ -320,11 +337,15 @@
       if (this.isMinimized) {
         container.classList.remove('minimized');
         this.isMinimized = false;
-        this.trackEvent('widget_expanded');
+        if (this.getConfig().tracking) {
+          this.trackEvent('widget_expanded');
+        }
       } else {
         container.classList.add('minimized');
         this.isMinimized = true;
-        this.trackEvent('widget_minimized');
+        if (this.getConfig().tracking) {
+          this.trackEvent('widget_minimized');
+        }
       }
     }
 
@@ -403,7 +424,9 @@
     sendAnalytics(event) {
       // Send analytics data to your backend or analytics service
       // This can be customized based on your needs
-      console.log('Analytics Event:', event);
+      if (this.getAttribute('debug') === 'true') {
+        console.log('Analytics Event:', event);
+      }
       
       // Example: Send to analytics endpoint
       /*

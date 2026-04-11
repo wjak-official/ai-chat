@@ -7,7 +7,6 @@ export const supabaseConfig = {
 export const ragConfig = {
   // Table names
   documentsTable: 'website_documents',
-  embeddingsTable: 'website_embeddings',
   
   // Embedding settings
   embeddingModel: 'all-minilm',

@@ -73,10 +73,10 @@ create policy "Allow public users to read documents"
   to anon, authenticated
   using (true);
 
--- Allow public (anon) users to insert documents
-create policy "Allow public users to insert documents"
+-- Allow authenticated users or service role to insert documents (not anon)
+create policy "Allow authenticated users to insert documents"
   on website_documents for insert
-  to anon, authenticated
+  to authenticated
   with check (true);
 
 -- Allow authenticated users to update documents
