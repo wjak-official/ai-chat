@@ -1,14 +1,593 @@
-<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AI-powered chat tool with customizable personalities" />
-    <title>AI Chat</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>The Marketplace â€” Coming Soon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="lead-api-key" content="" />
+  <style>
+    :root {
+      --bg: #050816;
+      --card: #0f172a;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --error: #f97373;
+      --success: #4ade80;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 960px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 32px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .lang-switch {
+        justify-content: flex-start;
+      }
+    }
+
+    .hero {
+      padding: 28px 28px 32px;
+      border-radius: 24px;
+      background: radial-gradient(circle at top left, #1e293b 0, #020617 55%);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.16), transparent 55%),
+        radial-gradient(circle at 100% 0, rgba(129, 140, 248, 0.16), transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.25);
+    }
+
+    .title {
+      font-size: clamp(28px, 4vw, 36px);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .title span {
+      background: linear-gradient(120deg, #38bdf8, #a855f7, #f97316);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin-bottom: 20px;
+    }
+
+    .arabic {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      direction: rtl;
+      text-align: right;
+    }
+
+    .lang-switch {
+      display: flex;
+      gap: 8px;
+      margin: 6px 0 18px;
+    }
+
+    .lang-btn {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text-muted);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .lang-btn.active {
+      color: var(--text-main);
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--text-muted);
+    }
+
+    .metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .metric {
+      min-width: 120px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .metric-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .metric-value span {
+      color: var(--accent);
+    }
+
+    .card {
+      padding: 22px 20px 20px;
+      border-radius: 20px;
+      background: radial-gradient(circle at top, #020617 0, #020617 55%);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(248, 250, 252, 0.04), transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    button {
+      margin-top: 6px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(120deg, #38bdf8, #a855f7);
+      color: #0b1120;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow:
+        0 14px 30px rgba(56, 189, 248, 0.35),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow:
+        0 18px 40px rgba(56, 189, 248, 0.45),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow:
+        0 10px 24px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+    }
+
+    .status {
+      margin-top: 8px;
+      font-size: 12px;
+      min-height: 16px;
+    }
+
+    .status.error {
+      color: var(--error);
+    }
+
+    .status.success {
+      color: var(--success);
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .rtl {
+      direction: rtl;
+      text-align: right;
+    }
+
+    .ltr {
+      direction: ltr;
+      text-align: left;
+    }
+
+    .lang-panel {
+      display: none;
+    }
+
+    .lang-panel.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span data-i18n="badge">Telegram Mini App · Multi‑Vendor Marketplace</span>
+        </div>
+
+        <div class="lang-switch" role="tablist" aria-label="Language switcher">
+          <button type="button" class="lang-btn active" data-lang="en" role="tab" aria-selected="true">English</button>
+          <button type="button" class="lang-btn" data-lang="ar" role="tab" aria-selected="false">العربية</button>
+        </div>
+
+        <div id="hero-en" class="lang-panel active ltr">
+          <h1 class="title">
+            The <span>Marketplace</span><br />
+            Your gateway to products, services & affiliate earnings.
+          </h1>
+          <p class="subtitle">
+            We’re preparing the next evolution of Telegram commerce — a unified marketplace where vendors sell,
+            affiliates earn, and customers shop effortlessly inside Telegram.
+          </p>
+        </div>
+
+        <div id="hero-ar" class="lang-panel rtl" lang="ar">
+          <h1 class="title">
+            <span>السوق</span><br />
+            بوابتك للمنتجات والخدمات وأرباح التسويق بالعمولة.
+          </h1>
+          <p class="subtitle">
+            نجهّز الجيل القادم من التجارة داخل تيليجرام — سوق موحّد يتيح للبائعين البيع،
+            وللشركاء تحقيق العمولة، وللعملاء التسوق بسهولة داخل تيليجرام.
+          </p>
+        </div>
+
+        <div id="pills-en" class="pill-row lang-panel active ltr">
+          <div class="pill">Zero setup cost</div>
+          <div class="pill">Earn 10–30% commissions</div>
+          <div class="pill">Vendors & affiliates welcome</div>
+          <div class="pill">Instant payouts</div>
+        </div>
+        <div id="pills-ar" class="pill-row lang-panel rtl" lang="ar">
+          <div class="pill">بدون تكلفة إعداد</div>
+          <div class="pill">عمولات 10–30%</div>
+          <div class="pill">البائعون والشركاء مرحّب بهم</div>
+          <div class="pill">دفعات فورية</div>
+        </div>
+
+        <div id="metrics-en" class="metrics lang-panel active ltr">
+          <div class="metric">
+            <div class="metric-label">Affiliate earnings</div>
+            <div class="metric-value"><span>$0.00</span> so far</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Commission range</div>
+            <div class="metric-value">10–30%</div>
+          </div>
+        </div>
+        <div id="metrics-ar" class="metrics lang-panel rtl" lang="ar">
+          <div class="metric">
+            <div class="metric-label">أرباح المسوقين</div>
+            <div class="metric-value"><span>$0.00</span> حتى الآن</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">نطاق العمولة</div>
+            <div class="metric-value">10–30%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-inner">
+        <div id="card-en" class="lang-panel active ltr">
+          <div class="card-title">Join the early access list</div>
+          <div class="card-subtitle">
+            Whether you're a vendor, service provider, or affiliate — tell us how you want to use The Marketplace.
+            We’ll notify you when your category opens.
+          </div>
+        </div>
+        <div id="card-ar" class="lang-panel rtl" lang="ar">
+          <div class="card-title">انضم إلى قائمة الوصول المبكر</div>
+          <div class="card-subtitle">
+            سواء كنت بائعًا أو مقدم خدمة أو شريكًا — أخبرنا كيف تريد استخدام السوق.
+            سنخبرك عند فتح المجال.
+          </div>
+        </div>
+
+        <form id="lead-form">
+          <div class="row">
+            <div>
+              <label for="name" data-i18n="label_name">Name / الاسم</label>
+              <input id="name" name="name" type="text" placeholder="Your name" required minlength="2" maxlength="100" autocomplete="name" />
+            </div>
+            <div>
+              <label for="email" data-i18n="label_email">Email / البريد الإلكتروني</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" required maxlength="160" autocomplete="email" inputmode="email" />
+            </div>
+          </div>
+
+          <div>
+            <label for="role" data-i18n="label_role">Who are you? / من أنت؟</label>
+            <input id="role" name="role" type="text" placeholder="Vendor, service provider, affiliate, etc." maxlength="120" />
+          </div>
+
+          <div>
+            <label for="message" data-i18n="label_message">Tell us more / أخبرنا المزيد</label>
+            <textarea id="message" name="message" placeholder="What do you want to sell or promote? Any specific needs?" maxlength="2000"></textarea>
+            <div class="hint" id="hint-en">Your message will be delivered directly to our internal Telegram workspace.</div>
+            <div class="hint rtl lang-panel" id="hint-ar" lang="ar">سيتم إرسال رسالتك مباشرة إلى مساحة تيليجرام الداخلية لدينا.</div>
+          </div>
+
+          <button type="submit">
+            <span data-i18n="cta">Request early access</span>
+            <span>â†’</span>
+          </button>
+
+          <div id="status" class="status" aria-live="polite"></div>
+        </form>
+
+        <div id="footer-en" class="footer-note lang-panel active ltr">
+          No spam. No mailing lists. Just a direct invite when your category is ready.
+        </div>
+        <div id="footer-ar" class="footer-note lang-panel rtl" lang="ar">
+          بدون رسائل مزعجة أو قوائم بريدية. دعوة مباشرة عندما تصبح المنصة جاهزة.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("lead-form");
+    const statusEl = document.getElementById("status");
+    const apiKey = document.querySelector('meta[name="lead-api-key"]').content || "";
+    const langButtons = document.querySelectorAll(".lang-btn");
+    const langPanels = document.querySelectorAll(".lang-panel");
+    const hintEn = document.getElementById("hint-en");
+    const hintAr = document.getElementById("hint-ar");
+
+    const sanitize = (value) => value.replace(/[\u0000-\u001F\u007F]/g, "").trim();
+    const isValidEmail = (value) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
+    let currentLang = "en";
+
+    const setLang = (lang) => {
+      currentLang = lang;
+      langButtons.forEach((btn) => {
+        const active = btn.dataset.lang === lang;
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      langPanels.forEach((panel) => {
+        const isAr = panel.getAttribute("lang") === "ar";
+        panel.classList.toggle("active", (lang === "ar" && isAr) || (lang === "en" && !isAr));
+      });
+      hintEn.classList.toggle("active", lang === "en");
+      hintAr.classList.toggle("active", lang === "ar");
+    };
+
+    langButtons.forEach((btn) => {
+      btn.addEventListener("click", () => setLang(btn.dataset.lang));
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      statusEl.textContent = currentLang === "ar" ? "جارٍ الإرسال..." : "Sending...";
+      statusEl.className = "status";
+
+      const name = sanitize(form.name.value);
+      const email = sanitize(form.email.value);
+      const role = sanitize(form.role.value);
+      const message = sanitize(form.message.value);
+
+      if (!name || name.length < 2) {
+        statusEl.textContent = currentLang === "ar" ? "يرجى إدخال اسم صحيح." : "Please enter a valid name.";
+        statusEl.className = "status error";
+        return;
+      }
+
+      if (!email || !isValidEmail(email)) {
+        statusEl.textContent = currentLang === "ar" ? "يرجى إدخال بريد إلكتروني صحيح." : "Please enter a valid email address.";
+        statusEl.className = "status error";
+        return;
+      }
+
+      const payload = {
+        name,
+        email,
+        role,
+        message,
+        source: "marketplace_landing",
+        ts: new Date().toISOString(),
+        idempotency_key: crypto.randomUUID()
+      };
+
+      try {
+        const res = await fetch("/api/lead", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {})
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error("Request failed");
+        }
+
+        statusEl.textContent = currentLang === "ar" ? "شكرًا لك! سنتواصل قريبًا." : "Thanks! We’ll reach out soon.";
+        statusEl.className = "status success";
+        form.reset();
+      } catch (err) {
+        statusEl.textContent = currentLang === "ar" ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "Something went wrong. Please try again.";
+        statusEl.className = "status error";
+      }
+    });
+  </script>
+</body>
 </html>
