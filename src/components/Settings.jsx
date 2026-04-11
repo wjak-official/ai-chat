@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useChat } from '../contexts/ChatContext';
 import { ollamaConfig } from '../config/ollama';
 import { geminiConfig } from '../config/gemini';
@@ -28,12 +28,12 @@ const Settings = ({ isOpen, onClose }) => {
       checkConnection();
       setApiKeyInput(geminiApiKey);
     }
-  }, [isOpen, geminiApiKey]);
+  }, [isOpen, geminiApiKey, checkConnection]);
 
-  const loadModels = async () => {
+  const loadModels = useCallback(async () => {
     const models = await aiService.listModels();
     setAvailableModels(models);
-  };
+  }, []);
 
   const handleProviderChange = (newProvider) => {
     changeProvider(newProvider);
@@ -46,7 +46,7 @@ const Settings = ({ isOpen, onClose }) => {
     if (isOpen) {
       loadModels();
     }
-  }, [provider, isOpen]);
+  }, [provider, isOpen, loadModels]);
 
   const handleApiKeyChange = async () => {
     if (!apiKeyInput || apiKeyInput.trim() === '') {
