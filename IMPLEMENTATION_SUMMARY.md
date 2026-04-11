@@ -63,7 +63,7 @@ Successfully implemented a complete AI-powered chat application with all request
 - ✅ Widget demo page (widget-demo.html)
 - ✅ Code comments throughout
 
-## �� Technical Specifications
+## Technical Specifications
 
 ### Frontend Stack
 - **React 19** - Latest version with new features
