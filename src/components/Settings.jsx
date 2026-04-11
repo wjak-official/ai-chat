@@ -130,7 +130,7 @@ const Settings = ({ isOpen, onClose }) => {
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Gemini API Key</h3>
               <p className="text-xs text-gray-500 mb-2">
-                Each user configures their own API key, which is stored locally in their browser.
+                You can save your own API key locally in this browser. If no key is saved, the app may use a build-time configured key if one is available.
               </p>
               <div className="space-y-2">
                 <div className="flex gap-2">
