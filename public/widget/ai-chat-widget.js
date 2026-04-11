@@ -265,7 +265,13 @@
       // Listen for messages from iframe
       const messageHandler = (event) => {
         const iframe = this.shadowRoot.getElementById('chat-iframe');
-        const expectedOrigin = new URL(this.getConfig().apiUrl).origin;
+        let expectedOrigin;
+
+        try {
+          expectedOrigin = new URL(this.getConfig().apiUrl).origin;
+        } catch (error) {
+          return;
+        }
         if (event.source !== iframe.contentWindow || event.origin !== expectedOrigin) {
           return;
         }
