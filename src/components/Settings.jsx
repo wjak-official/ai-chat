@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useChat } from '../contexts/ChatContext';
 import { ollamaConfig } from '../config/ollama';
 import { geminiConfig } from '../config/gemini';
@@ -25,22 +25,28 @@ const Settings = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      loadModels();
       checkConnection();
       setApiKeyInput(geminiApiKey);
     }
-  }, [isOpen, geminiApiKey]);
+  }, [isOpen, geminiApiKey, checkConnection]);
 
-  const loadModels = async () => {
+  const loadModels = useCallback(async () => {
     const models = await aiService.listModels();
     setAvailableModels(models);
-  };
+  }, []);
 
   const handleProviderChange = (newProvider) => {
     changeProvider(newProvider);
     setAvailableModels([]);
-    loadModels();
+    // loadModels is triggered by the useEffect below once the provider state settles
   };
+
+  // Reload models whenever provider changes
+  useEffect(() => {
+    if (isOpen) {
+      loadModels();
+    }
+  }, [provider, isOpen, loadModels]);
 
   const handleApiKeyChange = async () => {
     if (!apiKeyInput || apiKeyInput.trim() === '') {
@@ -123,6 +129,9 @@ const Settings = ({ isOpen, onClose }) => {
           {provider === 'gemini' && (
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Gemini API Key</h3>
+              <p className="text-xs text-gray-500 mb-2">
+                Each user configures their own API key, which is stored locally in their browser.
+              </p>
               <div className="space-y-2">
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
