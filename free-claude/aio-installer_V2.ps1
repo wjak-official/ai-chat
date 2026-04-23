@@ -657,26 +657,26 @@ tls:
 http:
   routers:
     laravel-http:
-      rule: "Host(`${domain}`) || Host(`localhost`)"
+      rule: 'Host("$domain") || Host("localhost")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: laravel-svc
 
     laravel-https:
-      rule: "Host(`${domain}`) || Host(`localhost`)"
+      rule: 'Host("$domain") || Host("localhost")'
       entryPoints: [ "websecure" ]
       tls: {}
       middlewares: [ "security-headers" ]
       service: laravel-svc
 
     proxy-http:
-      rule: "Host(`proxy.${domain}`)"
+      rule: 'Host("proxy.$domain")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: proxy-svc
 
     proxy-https:
-      rule: "Host(`proxy.${domain}`)"
+      rule: 'Host("proxy.$domain")'
       entryPoints: [ "websecure" ]
       tls: {}
       middlewares: [ "security-headers" ]
@@ -756,13 +756,13 @@ certificatesResolvers:
 http:
   routers:
     laravel-http:
-      rule: "Host(`${domain}`)"
+      rule: 'Host("$domain")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: laravel-svc
 
     laravel-https:
-      rule: "Host(`${domain}`)"
+      rule: 'Host("$domain")'
       entryPoints: [ "websecure" ]
       tls:
         certResolver: le
@@ -770,13 +770,13 @@ http:
       service: laravel-svc
 
     proxy-http:
-      rule: "Host(`proxy.${domain}`)"
+      rule: 'Host("proxy.$domain")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: proxy-svc
 
     proxy-https:
-      rule: "Host(`proxy.${domain}`)"
+      rule: 'Host("proxy.$domain")'
       entryPoints: [ "websecure" ]
       tls:
         certResolver: le
