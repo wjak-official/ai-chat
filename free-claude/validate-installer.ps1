@@ -118,7 +118,7 @@ foreach ($scenario in $scenarios) {
 
   $generatedFiles = @()
   if (Test-Path $rootDir) {
-    $generatedFiles = @(Get-ChildItem -Path $rootDir -Recurse -File | ForEach-Object {
+    $generatedFiles = @(Get-ChildItem -Path $rootDir -Recurse -File -Force | ForEach-Object {
       $_.FullName.Replace($rootDir, "<root>")
     } | Sort-Object)
   }

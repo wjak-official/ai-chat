@@ -197,6 +197,10 @@ function Ensure-Pip {
 }
 function Ensure-Uv {
   if (Test-Command "uv") { return $true }
+  if ($ValidationMode) {
+    Write-ValidationStep "uv not found; continuing without installing it"
+    return $true
+  }
   if (-not (Prompt-YesNo "Install uv using pip now? (pip install uv)" $true)) { return $false }
   python -m pip install --upgrade pip
   python -m pip install --upgrade uv

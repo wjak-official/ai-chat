@@ -1,0 +1,54 @@
+http:
+  routers:
+    laravel-http:
+      rule: "Host(${domain})"
+      entryPoints: [ "web" ]
+      middlewares: [ "redirect-to-https" ]
+      service: laravel-svc
+
+    laravel-https:
+      rule: "Host(${domain})"
+      entryPoints: [ "websecure" ]
+      tls:
+        certResolver: le
+      middlewares: [ "security-headers" ]
+      service: laravel-svc
+
+    proxy-http:
+      rule: "Host(proxy.public-llama-existing.example.test)"
+      entryPoints: [ "web" ]
+      middlewares: [ "redirect-to-https" ]
+      service: proxy-svc
+
+    proxy-https:
+      rule: "Host(proxy.public-llama-existing.example.test)"
+      entryPoints: [ "websecure" ]
+      tls:
+        certResolver: le
+      middlewares: [ "security-headers" ]
+      service: proxy-svc
+
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    security-headers:
+      headers:
+        sslRedirect: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: "no-referrer"
+
+  services:
+    laravel-svc:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8004"
+    proxy-svc:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8086"

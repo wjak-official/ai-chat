@@ -1,0 +1,10 @@
+services:
+  free-claude:
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    env_file:
+      - ./.env
+    ports:
+      - "8084:8084"
+    restart: unless-stopped

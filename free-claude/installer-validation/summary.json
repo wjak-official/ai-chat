@@ -1,0 +1,142 @@
+[
+  {
+    "Name": "openrouter-native-localtls-ragoff",
+    "ExitCode": 1,
+    "RootDir": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/openrouter-native-localtls-ragoff/stack-root",
+    "LogPath": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/openrouter-native-localtls-ragoff/run.log",
+    "GeneratedFiles": []
+  },
+  {
+    "Name": "nvidia-docker-publictls-redis-discord",
+    "ExitCode": 0,
+    "RootDir": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/nvidia-docker-publictls-redis-discord/stack-root",
+    "LogPath": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/nvidia-docker-publictls-redis-discord/run.log",
+    "GeneratedFiles": [
+      "<root>/laravel-admin/artisan",
+      "<root>/laravel-admin/database/database.sqlite",
+      "<root>/laravel-admin/package.json",
+      "<root>/nim-proxy/docker-compose.app.yml",
+      "<root>/nim-proxy/Dockerfile.runtime",
+      "<root>/nim-proxy/server.py",
+      "<root>/stack/acme/acme.json",
+      "<root>/stack/docker-compose.gateway.yml",
+      "<root>/stack/docker-compose.rag.yml",
+      "<root>/stack/traefik/dynamic.yml",
+      "<root>/stack/traefik/traefik.yml"
+    ]
+  },
+  {
+    "Name": "lmstudio-docker-publictls-postgres",
+    "ExitCode": 0,
+    "RootDir": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/lmstudio-docker-publictls-postgres/stack-root",
+    "LogPath": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/lmstudio-docker-publictls-postgres/run.log",
+    "GeneratedFiles": [
+      "<root>/laravel-admin/artisan",
+      "<root>/laravel-admin/database/database.sqlite",
+      "<root>/laravel-admin/package.json",
+      "<root>/lmstudio-proxy/docker-compose.app.yml",
+      "<root>/lmstudio-proxy/Dockerfile.runtime",
+      "<root>/lmstudio-proxy/server.py",
+      "<root>/stack/acme/acme.json",
+      "<root>/stack/docker-compose.gateway.yml",
+      "<root>/stack/docker-compose.rag.yml",
+      "<root>/stack/traefik/dynamic.yml",
+      "<root>/stack/traefik/traefik.yml"
+    ]
+  },
+  {
+    "Name": "llamacpp-existing-native-publictls-both-telegram-authoff",
+    "ExitCode": 0,
+    "RootDir": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-existing-native-publictls-both-telegram-authoff/stack-root",
+    "LogPath": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-existing-native-publictls-both-telegram-authoff/run.log",
+    "GeneratedFiles": [
+      "<root>/laravel-admin/artisan",
+      "<root>/laravel-admin/database/database.sqlite",
+      "<root>/laravel-admin/package.json",
+      "<root>/llama-existing-proxy/server.py",
+      "<root>/stack/acme/acme.json",
+      "<root>/stack/docker-compose.gateway.yml",
+      "<root>/stack/docker-compose.rag.yml",
+      "<root>/stack/traefik/dynamic.yml",
+      "<root>/stack/traefik/traefik.yml"
+    ]
+  },
+  {
+    "Name": "llamacpp-docker-localfile-localtls",
+    "ExitCode": 0,
+    "RootDir": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-docker-localfile-localtls/stack-root",
+    "LogPath": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-docker-localfile-localtls/run.log",
+    "GeneratedFiles": [
+      "<root>/laravel-admin/artisan",
+      "<root>/laravel-admin/database/database.sqlite",
+      "<root>/laravel-admin/package.json",
+      "<root>/llama-docker-localfile-proxy/docker-compose.app.yml",
+      "<root>/llama-docker-localfile-proxy/Dockerfile.runtime",
+      "<root>/llama-docker-localfile-proxy/server.py",
+      "<root>/stack/certs/ca.crt",
+      "<root>/stack/certs/ca.key",
+      "<root>/stack/certs/ca.srl",
+      "<root>/stack/certs/tls.crt",
+      "<root>/stack/certs/tls.csr",
+      "<root>/stack/certs/tls.ext",
+      "<root>/stack/certs/tls.key",
+      "<root>/stack/docker-compose.gateway.yml",
+      "<root>/stack/docker-compose.llamacpp.yml",
+      "<root>/stack/docker-compose.rag.yml",
+      "<root>/stack/models/dummy-model.gguf",
+      "<root>/stack/traefik/dynamic.yml",
+      "<root>/stack/traefik/traefik.yml"
+    ]
+  },
+  {
+    "Name": "llamacpp-docker-download-localtls",
+    "ExitCode": 0,
+    "RootDir": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-docker-download-localtls/stack-root",
+    "LogPath": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-docker-download-localtls/run.log",
+    "GeneratedFiles": [
+      "<root>/laravel-admin/artisan",
+      "<root>/laravel-admin/database/database.sqlite",
+      "<root>/laravel-admin/package.json",
+      "<root>/llama-docker-download-proxy/docker-compose.app.yml",
+      "<root>/llama-docker-download-proxy/Dockerfile.runtime",
+      "<root>/llama-docker-download-proxy/server.py",
+      "<root>/stack/certs/ca.crt",
+      "<root>/stack/certs/ca.key",
+      "<root>/stack/certs/ca.srl",
+      "<root>/stack/certs/tls.crt",
+      "<root>/stack/certs/tls.csr",
+      "<root>/stack/certs/tls.ext",
+      "<root>/stack/certs/tls.key",
+      "<root>/stack/docker-compose.gateway.yml",
+      "<root>/stack/docker-compose.llamacpp.yml",
+      "<root>/stack/models/test-model.gguf",
+      "<root>/stack/traefik/dynamic.yml",
+      "<root>/stack/traefik/traefik.yml"
+    ]
+  },
+  {
+    "Name": "llamacpp-docker-skip-localtls",
+    "ExitCode": 0,
+    "RootDir": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-docker-skip-localtls/stack-root",
+    "LogPath": "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/llamacpp-docker-skip-localtls/run.log",
+    "GeneratedFiles": [
+      "<root>/laravel-admin/artisan",
+      "<root>/laravel-admin/database/database.sqlite",
+      "<root>/laravel-admin/package.json",
+      "<root>/llama-docker-skip-proxy/docker-compose.app.yml",
+      "<root>/llama-docker-skip-proxy/Dockerfile.runtime",
+      "<root>/llama-docker-skip-proxy/server.py",
+      "<root>/stack/certs/ca.crt",
+      "<root>/stack/certs/ca.key",
+      "<root>/stack/certs/ca.srl",
+      "<root>/stack/certs/tls.crt",
+      "<root>/stack/certs/tls.csr",
+      "<root>/stack/certs/tls.ext",
+      "<root>/stack/certs/tls.key",
+      "<root>/stack/docker-compose.gateway.yml",
+      "<root>/stack/docker-compose.llamacpp.yml",
+      "<root>/stack/traefik/dynamic.yml",
+      "<root>/stack/traefik/traefik.yml"
+    ]
+  }
+]

@@ -1,0 +1,22 @@
+[
+  "/home/runner/work/ai-chat/ai-chat/free-claude/installer-validation/runs/openrouter-native-localtls-ragoff/stack-root",
+  "laravel-admin",
+  "free-claude-code",
+  "0",
+  "0",
+  "0",
+  "local-openrouter.example.test",
+  "8081",
+  "8444",
+  "8001",
+  "8083",
+  "n",
+  "dummy-openrouter-key",
+  "open_router/test-model",
+  "opus-openrouter",
+  "sonnet-openrouter",
+  "haiku-openrouter",
+  "y",
+  "dummy-auth-openrouter",
+  "2"
+]
