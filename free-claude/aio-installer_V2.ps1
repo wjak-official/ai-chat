@@ -9,7 +9,7 @@ RootDir/
   stack/
     docker-compose.gateway.yml (Traefik TLS gateway)
     docker-compose.rag.yml     (Qdrant + optional Redis/Postgres)
-    docker-compose.llamacpp.yml(optional llama.cpp)
+    docker-compose.llamacpp.yml(optional llama.cpp)a
     traefik/
     certs/ or acme/
     models/                    (GGUF models for llama.cpp)
