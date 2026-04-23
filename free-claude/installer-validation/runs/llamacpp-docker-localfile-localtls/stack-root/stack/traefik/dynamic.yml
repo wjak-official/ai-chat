@@ -6,26 +6,26 @@ tls:
 http:
   routers:
     laravel-http:
-      rule: "Host(${domain}) || Host(localhost)"
+      rule: 'Host("local-llama-file.example.test") || Host("localhost")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: laravel-svc
 
     laravel-https:
-      rule: "Host(${domain}) || Host(localhost)"
+      rule: 'Host("local-llama-file.example.test") || Host("localhost")'
       entryPoints: [ "websecure" ]
       tls: {}
       middlewares: [ "security-headers" ]
       service: laravel-svc
 
     proxy-http:
-      rule: "Host(proxy.local-llama-file.example.test)"
+      rule: 'Host("proxy.local-llama-file.example.test")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: proxy-svc
 
     proxy-https:
-      rule: "Host(proxy.local-llama-file.example.test)"
+      rule: 'Host("proxy.local-llama-file.example.test")'
       entryPoints: [ "websecure" ]
       tls: {}
       middlewares: [ "security-headers" ]

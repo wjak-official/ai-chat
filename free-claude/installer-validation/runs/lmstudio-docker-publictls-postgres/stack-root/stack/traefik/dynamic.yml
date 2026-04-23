@@ -1,13 +1,13 @@
 http:
   routers:
     laravel-http:
-      rule: "Host(${domain})"
+      rule: 'Host("public-lmstudio.example.test")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: laravel-svc
 
     laravel-https:
-      rule: "Host(${domain})"
+      rule: 'Host("public-lmstudio.example.test")'
       entryPoints: [ "websecure" ]
       tls:
         certResolver: le
@@ -15,13 +15,13 @@ http:
       service: laravel-svc
 
     proxy-http:
-      rule: "Host(proxy.public-lmstudio.example.test)"
+      rule: 'Host("proxy.public-lmstudio.example.test")'
       entryPoints: [ "web" ]
       middlewares: [ "redirect-to-https" ]
       service: proxy-svc
 
     proxy-https:
-      rule: "Host(proxy.public-lmstudio.example.test)"
+      rule: 'Host("proxy.public-lmstudio.example.test")'
       entryPoints: [ "websecure" ]
       tls:
         certResolver: le
