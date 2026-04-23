@@ -15,8 +15,26 @@ RootDir/
     models/                    (GGUF models for llama.cpp)
 #>
 
+param(
+  [switch]$ValidationMode,
+  [string]$PromptAnswersPath
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+$script:PromptAnswers = @()
+$script:PromptAnswerIndex = 0
+
+if ($PromptAnswersPath) {
+  if (-not (Test-Path $PromptAnswersPath)) { throw "Prompt answers file not found: $PromptAnswersPath" }
+  $loadedAnswers = Get-Content -Path $PromptAnswersPath -Raw | ConvertFrom-Json
+  if ($null -ne $loadedAnswers) {
+    $script:PromptAnswers = @($loadedAnswers | ForEach-Object {
+      if ($null -eq $_) { "" } else { [string]$_ }
+    })
+  }
+}
 
 # ======================
 # UI helpers
@@ -31,10 +49,19 @@ function Write-Info([string]$Text) { Write-Host "[INFO] $Text" -ForegroundColor 
 function Write-Warn([string]$Text) { Write-Host "[WARN] $Text" -ForegroundColor Yellow }
 function Write-Err ([string]$Text) { Write-Host "[ERR ] $Text" -ForegroundColor Red }
 
+function Get-NextPromptAnswer([string]$Question) {
+  if ($script:PromptAnswerIndex -ge $script:PromptAnswers.Count) { return $null }
+  $answer = $script:PromptAnswers[$script:PromptAnswerIndex]
+  $script:PromptAnswerIndex++
+  Write-Info ("AUTO: {0} => {1}" -f $Question, $(if ([string]::IsNullOrEmpty($answer)) { "<default>" } else { $answer }))
+  return $answer
+}
+
 function Prompt-YesNo([string]$Question, [bool]$Default = $true) {
   $suffix = if ($Default) { "[Y/n]" } else { "[y/N]" }
   while ($true) {
-    $raw = Read-Host "$Question $suffix"
+    $raw = Get-NextPromptAnswer "$Question $suffix"
+    if ($null -eq $raw) { $raw = Read-Host "$Question $suffix" }
     if ([string]::IsNullOrWhiteSpace($raw)) { return $Default }
     switch ($raw.Trim().ToLowerInvariant()) {
       "y" { return $true }
@@ -46,13 +73,16 @@ function Prompt-YesNo([string]$Question, [bool]$Default = $true) {
   }
 }
 function Prompt-Text([string]$Question, [string]$Default = "") {
-  $raw = Read-Host "$Question$(if($Default){ " (default: $Default)" } else { "" })"
+  $suffix = if ([string]::IsNullOrEmpty($Default)) { "" } else { " (default: $Default)" }
+  $raw = Get-NextPromptAnswer "$Question$suffix"
+  if ($null -eq $raw) { $raw = Read-Host "$Question$suffix" }
   if ([string]::IsNullOrWhiteSpace($raw)) { return $Default }
   return $raw
 }
 function Prompt-Int([string]$Question, [int]$Default) {
   while ($true) {
-    $raw = Read-Host "$Question (default: $Default)"
+    $raw = Get-NextPromptAnswer "$Question (default: $Default)"
+    if ($null -eq $raw) { $raw = Read-Host "$Question (default: $Default)" }
     if ([string]::IsNullOrWhiteSpace($raw)) { return $Default }
     $n = 0
     if ([int]::TryParse($raw, [ref]$n)) { return $n }
@@ -67,7 +97,9 @@ function Prompt-Choice([string]$Question, [string[]]$Options, [int]$DefaultIndex
     Write-Host ("  [{0}] {1} {2}" -f $i, $Options[$i], $mark) -ForegroundColor Gray
   }
   while ($true) {
-    $raw = Read-Host ("Choose 0-{0} (default: {1})" -f ($Options.Count-1), $DefaultIndex)
+    $choicePrompt = ("Choose 0-{0} (default: {1})" -f ($Options.Count-1), $DefaultIndex)
+    $raw = Get-NextPromptAnswer "$Question :: $choicePrompt"
+    if ($null -eq $raw) { $raw = Read-Host $choicePrompt }
     if ([string]::IsNullOrWhiteSpace($raw)) { return $DefaultIndex }
     $n = 0
     if ([int]::TryParse($raw, [ref]$n) -and $n -ge 0 -and $n -lt $Options.Count) { return $n }
@@ -75,6 +107,8 @@ function Prompt-Choice([string]$Question, [string[]]$Options, [int]$DefaultIndex
   }
 }
 function Read-Secret([string]$Prompt) {
+  $queued = Get-NextPromptAnswer $Prompt
+  if ($null -ne $queued) { return $queued }
   $secure = Read-Host $Prompt -AsSecureString
   $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
   try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
@@ -97,6 +131,41 @@ function Write-Utf8File([string]$Path, [string]$Content) {
   Set-Content -Path $Path -Value $Content -Encoding UTF8
 }
 function Assert([bool]$Condition, [string]$Message) { if (-not $Condition) { throw $Message } }
+function Write-ValidationStep([string]$Text) {
+  if ($ValidationMode) { Write-Info "VALIDATION: $Text" }
+}
+
+function Initialize-ValidationLaravelApp([string]$Path) {
+  Ensure-Directory $Path
+  Ensure-Directory (Join-Path $Path "database")
+  Write-Utf8File (Join-Path $Path ".env.example") @"
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+"@
+  Write-Utf8File (Join-Path $Path "artisan") "<?php echo 'artisan validation stub';"
+  Write-Utf8File (Join-Path $Path "package.json") '{"private":true,"scripts":{"build":"echo validation build"}}'
+  Ensure-File (Join-Path $Path "database/database.sqlite")
+}
+
+function Initialize-ValidationProxyRepo([string]$Path) {
+  Ensure-Directory $Path
+  Write-Utf8File (Join-Path $Path ".env.example") @"
+MODEL=
+MODEL_OPUS=
+MODEL_SONNET=
+MODEL_HAIKU=
+ANTHROPIC_AUTH_TOKEN=
+OPENROUTER_API_KEY=
+NVIDIA_NIM_API_KEY=
+LM_STUDIO_BASE_URL=
+LLAMACPP_BASE_URL=
+"@
+  Write-Utf8File (Join-Path $Path "server.py") "app = object()"
+}
 
 function Install-WithWinget([string]$Id, [string]$Name) {
   if (-not (Test-Command "winget")) {
@@ -262,10 +331,15 @@ Ensure-Directory $modelsDir
 Write-Title "Installing Laravel + Filament"
 $laravelPath = Join-Path $rootDir $laravelName
 if (-not (Test-Path $laravelPath)) {
-  Push-Location $rootDir
-  try {
-    composer create-project laravel/laravel $laravelName
-  } finally { Pop-Location }
+  if ($ValidationMode) {
+    Write-ValidationStep "Creating validation Laravel skeleton at $laravelPath"
+    Initialize-ValidationLaravelApp $laravelPath
+  } else {
+    Push-Location $rootDir
+    try {
+      composer create-project laravel/laravel $laravelName
+    } finally { Pop-Location }
+  }
 } else {
   Write-Info "Laravel exists: $laravelPath"
 }
@@ -273,10 +347,14 @@ if (-not (Test-Path $laravelPath)) {
 Push-Location $laravelPath
 try {
   if ((Test-Path ".env.example") -and -not (Test-Path ".env")) { Copy-Item ".env.example" ".env" }
-  php artisan key:generate
+  if ($ValidationMode) {
+    Write-ValidationStep "Skipping Laravel dependency install/build commands"
+  } else {
+    php artisan key:generate
 
-  composer require filament/filament:"^3.0" -W
-  php artisan filament:install --panels
+    composer require filament/filament:"^3.0" -W
+    php artisan filament:install --panels
+  }
 
   Ensure-Directory (Join-Path $laravelPath "database")
   $sqliteFile = Join-Path $laravelPath "database\database.sqlite"
@@ -286,8 +364,12 @@ try {
   Ensure-LineInEnv $laravelEnv "DB_CONNECTION" '"sqlite"'
   Ensure-LineInEnv $laravelEnv "DB_DATABASE" '"database/database.sqlite"'
 
-  npm install
-  npm run build
+  if ($ValidationMode) {
+    Write-ValidationStep "Skipping npm install/build for Laravel app"
+  } else {
+    npm install
+    npm run build
+  }
 } finally { Pop-Location }
 
 # ======================
@@ -296,7 +378,12 @@ try {
 Write-Title "Installing free-claude-code"
 $proxyPath = Join-Path $rootDir $proxyName
 if (-not (Test-Path $proxyPath)) {
-  git clone https://github.com/Alishahryar1/free-claude-code.git $proxyPath
+  if ($ValidationMode) {
+    Write-ValidationStep "Creating validation proxy skeleton at $proxyPath"
+    Initialize-ValidationProxyRepo $proxyPath
+  } else {
+    git clone https://github.com/Alishahryar1/free-claude-code.git $proxyPath
+  }
 } else {
   Write-Info "Proxy exists: $proxyPath"
 }
@@ -363,7 +450,12 @@ switch ($providerIdx) {
         Assert (-not [string]::IsNullOrWhiteSpace($url)) "Model URL is required."
         $file = Split-Path $url -Leaf
         $dest = Join-Path $modelsDir $file
-        Invoke-WebRequest -Uri $url -OutFile $dest
+        if ($ValidationMode) {
+          Write-ValidationStep "Creating placeholder GGUF download at $dest"
+          Write-Utf8File $dest "validation placeholder for $url"
+        } else {
+          Invoke-WebRequest -Uri $url -OutFile $dest
+        }
         $modelMount = "/models/$file"
       } else {
         $modelMount = "/models/CHANGE_ME.gguf"
