@@ -49,11 +49,12 @@ function Write-Info([string]$Text) { Write-Host "[INFO] $Text" -ForegroundColor 
 function Write-Warn([string]$Text) { Write-Host "[WARN] $Text" -ForegroundColor Yellow }
 function Write-Err ([string]$Text) { Write-Host "[ERR ] $Text" -ForegroundColor Red }
 
-function Get-NextPromptAnswer([string]$Question) {
+function Get-NextPromptAnswer([string]$Question, [bool]$Sensitive = $false) {
   if ($script:PromptAnswerIndex -ge $script:PromptAnswers.Count) { return $null }
   $answer = $script:PromptAnswers[$script:PromptAnswerIndex]
   $script:PromptAnswerIndex++
-  Write-Info ("AUTO: {0} => {1}" -f $Question, $(if ([string]::IsNullOrEmpty($answer)) { "<default>" } else { $answer }))
+  $displayValue = if ($Sensitive -and -not [string]::IsNullOrEmpty($answer)) { "<redacted>" } elseif ([string]::IsNullOrEmpty($answer)) { "<default>" } else { $answer }
+  Write-Info ("AUTO: {0} => {1}" -f $Question, $displayValue)
   return $answer
 }
 
@@ -107,7 +108,7 @@ function Prompt-Choice([string]$Question, [string[]]$Options, [int]$DefaultIndex
   }
 }
 function Read-Secret([string]$Prompt) {
-  $queued = Get-NextPromptAnswer $Prompt
+  $queued = Get-NextPromptAnswer $Prompt $true
   if ($null -ne $queued) { return $queued }
   $secure = Read-Host $Prompt -AsSecureString
   $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
