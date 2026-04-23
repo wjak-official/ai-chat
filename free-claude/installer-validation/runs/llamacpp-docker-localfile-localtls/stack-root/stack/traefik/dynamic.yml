@@ -1,0 +1,54 @@
+tls:
+  certificates:
+    - certFile: /certs/tls.crt
+      keyFile: /certs/tls.key
+
+http:
+  routers:
+    laravel-http:
+      rule: 'Host("local-llama-file.example.test") || Host("localhost")'
+      entryPoints: [ "web" ]
+      middlewares: [ "redirect-to-https" ]
+      service: laravel-svc
+
+    laravel-https:
+      rule: 'Host("local-llama-file.example.test") || Host("localhost")'
+      entryPoints: [ "websecure" ]
+      tls: {}
+      middlewares: [ "security-headers" ]
+      service: laravel-svc
+
+    proxy-http:
+      rule: 'Host("proxy.local-llama-file.example.test")'
+      entryPoints: [ "web" ]
+      middlewares: [ "redirect-to-https" ]
+      service: proxy-svc
+
+    proxy-https:
+      rule: 'Host("proxy.local-llama-file.example.test")'
+      entryPoints: [ "websecure" ]
+      tls: {}
+      middlewares: [ "security-headers" ]
+      service: proxy-svc
+
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: false
+
+    security-headers:
+      headers:
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: "no-referrer"
+
+  services:
+    laravel-svc:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8005"
+    proxy-svc:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8087"

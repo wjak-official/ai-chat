@@ -1,0 +1,14 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "8082:80"
+      - "8445:443"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro"
+      - "./acme:/acme"
+    restart: unless-stopped
